@@ -1,4 +1,4 @@
-bertini_real
+b1_timing
 ============
 
 software for timing of Bertini

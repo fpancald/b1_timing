@@ -1,8 +1,8 @@
 bertini_real
 ============
 
-software for real algebraic sets
+software for timing of Bertini
 
-this software implements a numerical algorithm for decomposing real surfaces of arbitrary dimension, using Bertini as the computational engine.  
+the aim of this software is to provide an environment to compare tasks implemented in bertini vers 1.* with the new bertini 2.* or other similar libraries.  
 
-for documentation, please visit bertinireal.com
+for documentation, please visit https://github.com/fpancald/b1_timing

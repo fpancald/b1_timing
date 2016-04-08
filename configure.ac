@@ -3,8 +3,8 @@
 
 
 
-#we're building bertini_real, version 1.0.0, and the corresponding email is dan brake's
-AC_INIT([bertini_real], [1.0.0], [danielthebrake@gmail.com],[bertini_real], [http://www.danielthebrake.org/])
+#we're building b1_timing, version 1.0.0, and the corresponding email is Francesco Pancaldi's
+AC_INIT([b1_timing], [1.0.0], [fpancald@nd.edu],[b1_timing], [http://www3.nd.edu/~fpancald/])
 
 
 # Force autoconf to be at least this version number:
@@ -19,7 +19,7 @@ AC_CONFIG_AUX_DIR([config])
 # see Recursive Make Considered Harmful, and any number of demos.
 AM_INIT_AUTOMAKE([1.13 subdir-objects])
 
-#the language for BertiniReal is C++
+#the language for b1_timing is C++
 AC_LANG([C++])
 
 #another directive to use the m4 folder
@@ -97,7 +97,7 @@ AC_SEARCH_LIBS([cos], [m], [], [
 
 
 
-AX_BOOST_BASE([1.50],, [AC_MSG_ERROR([bertini_real needs Boost, but it was not found in your system])])
+AX_BOOST_BASE([1.50],, [AC_MSG_ERROR([b1_timing needs Boost, but it was not found in your system])])
 AX_BOOST_SYSTEM
 AX_BOOST_FILESYSTEM
 

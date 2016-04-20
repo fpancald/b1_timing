@@ -2,10 +2,10 @@
 
 int main()
 {
-    std::chrono::time_point<std::chrono::high_resolution_clock> ct1, ct2;
-    std::chrono::duration<double> elapsed_seconds;
+    std::chrono::time_point<std::chrono::high_resolution_clock> ct1, ct2, for_start, for_end;
+    std::chrono::duration<double> elapsed_seconds, for_laps;
     FILE *fpA, *fpx, *fpb;
-		int prec=1024, size=100, iter=10;
+		int prec=1024, size=100, iter=1;
     double tol=1e-16, largeChange=1e16;
     mpf_t mpftol,  mpflargeChange;
     mpf_init2(mpftol,prec);
@@ -15,15 +15,21 @@ int main()
     double cond_num,  norm_A,  norm_A_inv;
     double diff;
 
+    mat_mp A;
+    vec_mp x, b;
+    init_mat_mp2(A,size,size,prec);
+    init_vec_mp2(x,size,prec);
+    init_vec_mp2(b,size,prec);
 
+    for_start=std::chrono::system_clock::now();
 	for (int i=0;i<iter;i++)
 		//vec_mp vec;
 		{
-		mat_mp A;
-    vec_mp x, b;
-		init_mat_mp2(A,size,size,prec);
-    init_vec_mp2(x,size,prec);
-    init_vec_mp2(b,size,prec);
+		// mat_mp A;
+    // vec_mp x, b;
+		// init_mat_mp2(A,size,size,prec);
+    // init_vec_mp2(x,size,prec);
+    // init_vec_mp2(b,size,prec);
 
 		make_matrix_random_mp(A,size, size, prec);
 		make_vec_random_mp(b,size);
@@ -53,12 +59,19 @@ int main()
 		// printVec_Matlab_mp(fpx, prec, x);
     // fclose(fpx);
 
-		clear_mat_mp(A);
+		// clear_mat_mp(A);
+    // clear_vec_mp(x);
+    // clear_vec_mp(b);
+		}
+    for_end=std::chrono::system_clock::now();
+    for_laps=for_end-for_start;
+
+    std::cout << "elapsed time for linear algebra operations: " << elapsed_seconds.count() << "s\n";
+    std::cout << "elapsed time during for-loop: " << for_laps.count() << "s\n";
+
+    clear_mat_mp(A);
     clear_vec_mp(x);
     clear_vec_mp(b);
-		}
-
-    std::cout << "elapsed time: " << elapsed_seconds.count() << "s\n";
 
     mpf_clear(mpftol);
     mpf_clear(mpflargeChange);

@@ -95,7 +95,8 @@ AC_SEARCH_LIBS([cos], [m], [], [
   AC_MSG_ERROR([unable to find the cos() function])
   ])
 
-
+# look for a header file in Eigen, and croak if fail to find.
+AX_EIGEN
 
 AX_BOOST_BASE([1.50],, [AC_MSG_ERROR([b1_timing needs Boost, but it was not found in your system])])
 AX_BOOST_SYSTEM

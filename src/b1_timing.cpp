@@ -15,11 +15,15 @@ int main()
     double cond_num,  norm_A,  norm_A_inv;
     double diff;
 
+    uint usize=10;
+
     mat_mp A;
     vec_mp x, b;
     init_mat_mp2(A,size,size,prec);
     init_vec_mp2(x,size,prec);
     init_vec_mp2(b,size,prec);
+
+    // bertini::Vec<bertini::complex> vecb;
 
     for_start=std::chrono::system_clock::now();
 	for (int i=0;i<iter;i++)
@@ -33,6 +37,9 @@ int main()
 
 		make_matrix_random_mp(A,size, size, prec);
 		make_vec_random_mp(b,size);
+
+    bertini::Vec<bertini::complex> vecb=bertini::RandomOfUnits<bertini::complex>(usize);
+    // bertini::Vec<bertini::mpfr> vecb=bertini::RandomOfUnits<bertini::mpfr>(usize);
 
 		// fpA = fopen ("matrixA.txt" , "a+");
 		// printMat_Matlab_mp(fpA, prec, A);

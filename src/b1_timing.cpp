@@ -5,7 +5,7 @@ int main()
     std::chrono::time_point<std::chrono::high_resolution_clock> ct1, ct2, for_start, for_end;
     std::chrono::duration<double> elapsed_seconds, for_laps;
     FILE *fpA, *fpx, *fpb;
-		int prec=1024, size=100, iter=1;
+		int prec=1024, size=10, iter=1;
     double tol=1e-16, largeChange=1e16;
     mpf_t mpftol,  mpflargeChange;
     mpf_init2(mpftol,prec);
@@ -15,7 +15,7 @@ int main()
     double cond_num,  norm_A,  norm_A_inv;
     double diff;
 
-    uint usize=10;
+    uint usize=(int)size;
 
     mat_mp A;
     vec_mp x, b;
@@ -23,7 +23,14 @@ int main()
     init_vec_mp2(x,size,prec);
     init_vec_mp2(b,size,prec);
 
+    bool DontAlignCols=false;
+    int sprec=5;
     // bertini::Vec<bertini::complex> vecb;
+    Eigen::IOFormat CommaInitFmt(sprec, DontAlignCols, ", ", ", ", "", "", " << ", ";");
+    Eigen::IOFormat CleanFmt(4, 0, ", ", "\n", "[", "]");
+    Eigen::IOFormat OctaveFmt(sprec, 0, ", ", ";\n", "", "", "[", "]");
+    Eigen::IOFormat MatlabFmtInline(sprec, 0, ", ", ";", "", "", "[", "]");
+    Eigen::IOFormat HeavyFmt(sprec, 0, ", ", ";\n", "[", "]", "[", "]");
 
     for_start=std::chrono::system_clock::now();
 	for (int i=0;i<iter;i++)
@@ -38,8 +45,36 @@ int main()
 		make_matrix_random_mp(A,size, size, prec);
 		make_vec_random_mp(b,size);
 
+    bertini::Vec<bertini::mpfr_float> rvecb , ivecb;
     bertini::Vec<bertini::complex> vecb=bertini::RandomOfUnits<bertini::complex>(usize);
-    // bertini::Vec<bertini::mpfr> vecb=bertini::RandomOfUnits<bertini::mpfr>(usize);
+    rvecb=vecb.real();
+    ivecb=vecb.imag();
+
+    std::cout << vecb.format(OctaveFmt);
+    std::stringstream buffer;
+    // buffer << vecb.format(OctaveFmt) << std::endl;
+    // fpb = fopen ("vectorb.txt" , "a+");
+    // fprintf(fpb,buffer.str().c_str());
+    // buffer.str( std::string() );
+    // buffer.clear();
+    //
+    // buffer << rvecb.format(OctaveFmt) << std::endl;
+    // fpb = fopen ("vectorb.txt" , "a+");
+    // fprintf(fpb,buffer.str().c_str());
+    // buffer.str( std::string() );
+    // buffer.clear();
+    // buffer << ivecb.format(OctaveFmt) << std::endl;
+    // fpb = fopen ("vectorb.txt" , "a+");
+    // fprintf(fpb,buffer.str().c_str());
+    // buffer.str( std::string() );
+    // buffer.clear();
+
+    // buffer << rvecb.format(OctaveFmt)<<"+i*"<<ivecb.format(OctaveFmt) << std::endl;
+    buffer << rvecb.format(MatlabFmtInline)<<"+i*"<<ivecb.format(MatlabFmtInline) << std::endl;
+    fpb = fopen ("vectorb.txt" , "a+");
+    fprintf(fpb,buffer.str().c_str());
+    buffer.str( std::string() );
+    buffer.clear();
 
 		// fpA = fopen ("matrixA.txt" , "a+");
 		// printMat_Matlab_mp(fpA, prec, A);

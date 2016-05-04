@@ -8,10 +8,13 @@ int main()
     std::chrono::time_point<std::chrono::high_resolution_clock> ct1_b1, ct2_b1, ct1_b2, ct2_b2, for_start, for_end;//initiate timing parameters
     std::chrono::duration<double> elapsed_seconds_b1, elapsed_seconds_b2, for_laps;
 
-    FILE *fpA_b1, *fpx_b1, *fpb_b1;//initiate file pointers for b1
+    FILE *fpA_b1, *fpx_b1, *fpb_b1, *fpelem_b1;//initiate file pointers for b1
     std::ofstream fpA_b2, fpx_b2, fpb_b2;
 
-		int prec_b1=64, size=100, iter=1000;//test parameters: prec_b1= bit precision, size=square matrix size, iter=number of repetition
+		int prec_b1=64, size=10, iter=1;//test parameters: prec_b1= bit precision, size=square matrix size, iter=number of repetition
+
+    initMP(prec_b1);
+
     int prec_b2=log10(prec_b1)/log2(prec_b1)*prec_b1;//convert precision in bits for b1 in precision in digits for b2
     // std::cout<<prec_b2<< "s\n";//uncomment to check number of digits
 
@@ -49,7 +52,7 @@ int main()
     for_start=std::chrono::system_clock::now();//start count for overall time
 
     int tmp=0;//for-loop varaibles
-    int i;
+    int i,j,k;
 
 	for (i=0;i<iter;i++)//start iterations
 		{
@@ -58,6 +61,13 @@ int main()
     // _point_mp elem_b1=b_b1[0];
     // _point_mp elem_b1=1;
     // _point_mp elem_b1=b_b1[0]->r;
+    // comp_mp elem;
+    // init_mp2(elem, prec_b1)
+    // set_mp(elem,&b_b1->coord[0]);
+    // fpelem_b1 = fopen ("elemb_b1.txt" , "a+");
+		// print_Matlab_mp(fpelem_b1, sprec, elem);
+    // fclose(fpelem_b1);
+    // clear_mp(elem);
 
     bertini::Mat<bertini::complex> A_b2=bertini::RandomOfUnits<bertini::complex>(usize,usize).eval();//define random matrix and vectors in b2 /*Note values are in the unit circle but the Matrix is NOT orthonormal*/
     bertini::Vec<bertini::complex> b_b2=bertini::RandomOfUnits<bertini::complex>(usize).eval();
@@ -68,14 +78,84 @@ int main()
     // std::cin>>b_b1[0];
     // elem_b2=b_b1[0];
 
-    bertini::Mat<bertini::complex> Q=A_b2.fullPivHouseholderQr().matrixQ().eval();//get orthonormal matrix
+    comp_mp vec_elem, mat_elem;
+    init_mp2(vec_elem, prec_b1);
+    init_mp2(mat_elem, prec_b1);
+    char *ch1 = NULL, *ch2 = NULL, buffer [2*prec_b2+10];
+    long e1,e2;
+    for(j=0;j<size;j++)
+      {
+        for(k=0;k<size;k++)
+          {
+            set_mp(mat_elem,&A_b1->entry[j][k]);
+            if (mpfr_number_p(mat_elem->r) && mpfr_number_p(mat_elem->i))
+            {
+              ch1 = mpf_get_str(NULL, &e1, 10, prec_b2, mat_elem->r);
+              ch2 = mpf_get_str(NULL, &e2, 10, prec_b2, mat_elem->i);
 
-    // fpA_b1 = fopen ("matrixA_b1.txt" , "a+");//write to file A and b for b1
-		// printMat_Matlab_mp(fpA_b1, sprec, A_b1);
-    // fclose(fpA_b1);
-    // fpb_b1 = fopen ("vectorb_b1.txt" , "a+");
-		// printVec_Matlab_mp(fpb_b1, sprec, b_b1);
-    // fclose(fpb_b1);
+              if (ch1[0] != '-')
+                if (ch2[0] != '-')
+                  sprintf(buffer, "(0.%se%ld,0.%se%ld)", ch1, e1, ch2, e2);
+                else
+                  sprintf(buffer, "(0.%se%ld,-0.%se%ld)", ch1, e1, &ch2[1], e2);
+              else
+                if (ch2[0] != '-')
+                  sprintf(buffer, "(-0.%se%ld,0.%se%ld)", &ch1[1], e1, ch2, e2);
+                else
+                  sprintf(buffer, "(-0.%se%ld,-0.%se%ld)", &ch1[1], e1, &ch2[1], e2);
+
+              free(ch1);
+              free(ch2);
+            }
+            else
+              sprintf(buffer, "(NaN,NaN)");
+
+            std::istringstream buffer_iss (buffer);
+            buffer_iss>>A_b2(j,k);
+
+            if(k==0)
+            {
+              set_mp(vec_elem,&b_b1->coord[j]);
+              if (mpfr_number_p(vec_elem->r) && mpfr_number_p(vec_elem->i))
+              {
+                ch1 = mpf_get_str(NULL, &e1, 10, prec_b2, vec_elem->r);
+                ch2 = mpf_get_str(NULL, &e2, 10, prec_b2, vec_elem->i);
+
+                if (ch1[0] != '-')
+                  if (ch2[0] != '-')
+                    sprintf(buffer, "(0.%se%ld,0.%se%ld)", ch1, e1, ch2, e2);
+                  else
+                    sprintf(buffer, "(0.%se%ld,-0.%se%ld)", ch1, e1, &ch2[1], e2);
+                else
+                  if (ch2[0] != '-')
+                    sprintf(buffer, "(-0.%se%ld,0.%se%ld)", &ch1[1], e1, ch2, e2);
+                  else
+                    sprintf(buffer, "(-0.%se%ld,-0.%se%ld)", &ch1[1], e1, &ch2[1], e2);
+
+                free(ch1);
+                free(ch2);
+              }
+              else
+                sprintf(buffer, "(NaN,NaN)");
+
+              // std::cout<<buffer;
+              std::istringstream buffer_iss (buffer);
+              buffer_iss>>b_b2[j];
+            }
+
+          }
+      }
+    clear_mp(vec_elem);
+    clear_mp(mat_elem);
+
+    // bertini::Mat<bertini::complex> Q=A_b2.fullPivHouseholderQr().matrixQ().eval();//get orthonormal matrix
+
+    fpA_b1 = fopen ("matrixA_b1.txt" , "a+");//write to file A and b for b1
+		printMat_Matlab_mp(fpA_b1, sprec, A_b1);
+    fclose(fpA_b1);
+    fpb_b1 = fopen ("vectorb_b1.txt" , "a+");
+		printVec_Matlab_mp(fpb_b1, sprec, b_b1);
+    fclose(fpb_b1);
 
     // std::stringstream buffer;//write to file A and b for b2
     // buffer << A_b2.real().format(MatlabFmtInline)<<"+i*"<<A_b2.imag().format(MatlabFmtInline) << std::endl;
@@ -84,12 +164,12 @@ int main()
     // buffer.str( std::string() );
     // buffer.clear();
 
-    // fpA_b2.open("matrixA_b2.txt" , std::ios::out | std::ios::app);
-    // fpA_b2 <<"\n"<<i<<") "<< A_b2.real().format(MatlabFmtInline)<<"+i*"<<A_b2.imag().format(MatlabFmtInline) << std::endl;
-    // fpA_b2.close();
-    // fpb_b2.open("vectorb_b2.txt" , std::ios::out | std::ios::app);
-    // fpb_b2 <<"\n"<<i<<") "<< b_b2.real().format(MatlabFmtInline)<<"+i*"<<b_b2.imag().format(MatlabFmtInline) << std::endl;
-    // fpb_b2.close();
+    fpA_b2.open("matrixA_b2.txt" , std::ios::out | std::ios::app);
+    fpA_b2 <<"\n"<<i<<") "<< A_b2.real().format(MatlabFmtInline)<<"+i*"<<A_b2.imag().format(MatlabFmtInline) << std::endl;
+    fpA_b2.close();
+    fpb_b2.open("vectorb_b2.txt" , std::ios::out | std::ios::app);
+    fpb_b2 <<"\n"<<i<<") "<< b_b2.real().format(MatlabFmtInline)<<"+i*"<<b_b2.imag().format(MatlabFmtInline) << std::endl;
+    fpb_b2.close();
 
     // buffer <<"\n"<<i<<") "<< b_b2.real().format(MatlabFmtInline)<<"+i*"<<b_b2.imag().format(MatlabFmtInline) << std::endl;
     // fpb_b2 = fopen ("vectorb_b2.txt" , "a+");
@@ -124,15 +204,19 @@ int main()
     // x_b2 = A_b2.partialPivLu().solve(b_b2);
     // x_b2 = A_b2.jacobiSvd().solve(b_b2);
 
-    x_b2 = Q.partialPivLu().solve(b_b2);
+    x_b2 = A_b2.partialPivLu().solve(b_b2);
 
 
     ct2_b2=std::chrono::system_clock::now();//end timing of one iteration for b2
     elapsed_seconds_b2 += ct2_b2-ct1_b2;//update total solving timing for b2
 
-    // fpx_b1 = fopen ("vectorx_b1.txt" , "a+");//write to file solution x for b1
-		// printVec_Matlab_mp(fpx_b1, sprec, x_b1);
-    // fclose(fpx_b1);
+    fpx_b1 = fopen ("vectorx_b1.txt" , "a+");//write to file solution x for b1
+		printVec_Matlab_mp(fpx_b1, sprec, x_b1);
+    fclose(fpx_b1);
+
+    fpx_b2.open("vectorx_b2.txt" , std::ios::out | std::ios::app);
+    fpx_b2 <<"\n"<<i<<") "<< x_b2.real().format(MatlabFmtInline)<<"+i*"<<x_b2.imag().format(MatlabFmtInline) << std::endl;
+    fpx_b2.close();
 
     // buffer << x_b2.real().format(MatlabFmtInline)<<"+i*"<<x_b2.imag().format(MatlabFmtInline) << std::endl;
     // fpx_b2 = fopen ("vectorx_b2.txt" , "a+");
@@ -166,6 +250,7 @@ int main()
     mpf_clear(mpftol);//clear mpfr parameters
     mpf_clear(mpflargeChange);
 
+    clearMP();// clears bertini 1 globals
     return 0;
 
 }

@@ -1,6 +1,6 @@
 #include "b1_timing.hpp"
 
-int main()
+int main(int nArgs, char* Args[])
 {
     const int Infinity=-1;
     using NumT = bertini::dbl;
@@ -9,9 +9,10 @@ int main()
     std::chrono::duration<double> elapsed_seconds_b1, elapsed_seconds_b2, for_laps;
 
     FILE *fpA_b1, *fpx_b1, *fpb_b1, *fpelem_b1;//initiate file pointers for b1
-    std::ofstream fpA_b2, fpx_b2, fpb_b2;
+    // std::ofstream fpA_b2, fpx_b2, fpb_b2;
 
-		int prec_b1=64, size=10, iter=1;//test parameters: prec_b1= bit precision, size=square matrix size, iter=number of repetition
+		// int prec_b1=1024, size=10, iter=1;//test parameters: prec_b1= bit precision, size=square matrix size, iter=number of repetition
+    int prec_b1=atoi(Args[1]), size=atoi(Args[2]), iter=atoi(Args[3]);
 
     initMP(prec_b1);
 
@@ -54,6 +55,12 @@ int main()
     int tmp=0;//for-loop varaibles
     int i,j,k;
 
+    // bertini::Mat<bertini::complex> A_b2=bertini::RandomOfUnits<bertini::complex>(usize,usize).eval();//define random matrix and vectors in b2 /*Note values are in the unit circle but the Matrix is NOT orthonormal*/
+    // bertini::Vec<bertini::complex> b_b2=bertini::RandomOfUnits<bertini::complex>(usize).eval();
+    bertini::Mat<bertini::complex> A_b2(size,size);
+    bertini::Vec<bertini::complex> b_b2(size);
+
+
 	for (i=0;i<iter;i++)//start iterations
 		{
 		make_matrix_random_mp(A_b1,size, size, prec_b1);//define random matrix and vectors in b1 /*Note values are in the unit circle and the Matrix is orthonormal*/
@@ -69,8 +76,8 @@ int main()
     // fclose(fpelem_b1);
     // clear_mp(elem);
 
-    bertini::Mat<bertini::complex> A_b2=bertini::RandomOfUnits<bertini::complex>(usize,usize).eval();//define random matrix and vectors in b2 /*Note values are in the unit circle but the Matrix is NOT orthonormal*/
-    bertini::Vec<bertini::complex> b_b2=bertini::RandomOfUnits<bertini::complex>(usize).eval();
+    // bertini::Mat<bertini::complex> A_b2=bertini::RandomOfUnits<bertini::complex>(usize,usize).eval();//define random matrix and vectors in b2 /*Note values are in the unit circle but the Matrix is NOT orthonormal*/
+    // bertini::Vec<bertini::complex> b_b2=bertini::RandomOfUnits<bertini::complex>(usize).eval();
     // bertini::complex elem_b2=b_b2[0];
     // bertini::complex elem_b2=1;
     // b_b2[0]=1;
@@ -150,12 +157,12 @@ int main()
 
     // bertini::Mat<bertini::complex> Q=A_b2.fullPivHouseholderQr().matrixQ().eval();//get orthonormal matrix
 
-    fpA_b1 = fopen ("matrixA_b1.txt" , "a+");//write to file A and b for b1
-		printMat_Matlab_mp(fpA_b1, sprec, A_b1);
-    fclose(fpA_b1);
-    fpb_b1 = fopen ("vectorb_b1.txt" , "a+");
-		printVec_Matlab_mp(fpb_b1, sprec, b_b1);
-    fclose(fpb_b1);
+    // fpA_b1 = fopen ("matrixA_b1.txt" , "a+");//write to file A and b for b1
+		// printMat_Matlab_mp(fpA_b1, sprec, A_b1);
+    // fclose(fpA_b1);
+    // fpb_b1 = fopen ("vectorb_b1.txt" , "a+");
+		// printVec_Matlab_mp(fpb_b1, sprec, b_b1);
+    // fclose(fpb_b1);
 
     // std::stringstream buffer;//write to file A and b for b2
     // buffer << A_b2.real().format(MatlabFmtInline)<<"+i*"<<A_b2.imag().format(MatlabFmtInline) << std::endl;
@@ -164,12 +171,12 @@ int main()
     // buffer.str( std::string() );
     // buffer.clear();
 
-    fpA_b2.open("matrixA_b2.txt" , std::ios::out | std::ios::app);
-    fpA_b2 <<"\n"<<i<<") "<< A_b2.real().format(MatlabFmtInline)<<"+i*"<<A_b2.imag().format(MatlabFmtInline) << std::endl;
-    fpA_b2.close();
-    fpb_b2.open("vectorb_b2.txt" , std::ios::out | std::ios::app);
-    fpb_b2 <<"\n"<<i<<") "<< b_b2.real().format(MatlabFmtInline)<<"+i*"<<b_b2.imag().format(MatlabFmtInline) << std::endl;
-    fpb_b2.close();
+    // fpA_b2.open("matrixA_b2.txt" , std::ios::out | std::ios::app);
+    // fpA_b2 <<"\n"<<i<<") "<< A_b2.real().format(MatlabFmtInline)<<"+i*"<<A_b2.imag().format(MatlabFmtInline) << std::endl;
+    // fpA_b2.close();
+    // fpb_b2.open("vectorb_b2.txt" , std::ios::out | std::ios::app);
+    // fpb_b2 <<"\n"<<i<<") "<< b_b2.real().format(MatlabFmtInline)<<"+i*"<<b_b2.imag().format(MatlabFmtInline) << std::endl;
+    // fpb_b2.close();
 
     // buffer <<"\n"<<i<<") "<< b_b2.real().format(MatlabFmtInline)<<"+i*"<<b_b2.imag().format(MatlabFmtInline) << std::endl;
     // fpb_b2 = fopen ("vectorb_b2.txt" , "a+");
@@ -203,20 +210,18 @@ int main()
     // x_b2 = A_b2.householderQr().solve(b_b2);
     // x_b2 = A_b2.partialPivLu().solve(b_b2);
     // x_b2 = A_b2.jacobiSvd().solve(b_b2);
-
     x_b2 = A_b2.partialPivLu().solve(b_b2);
-
 
     ct2_b2=std::chrono::system_clock::now();//end timing of one iteration for b2
     elapsed_seconds_b2 += ct2_b2-ct1_b2;//update total solving timing for b2
 
-    fpx_b1 = fopen ("vectorx_b1.txt" , "a+");//write to file solution x for b1
-		printVec_Matlab_mp(fpx_b1, sprec, x_b1);
-    fclose(fpx_b1);
-
-    fpx_b2.open("vectorx_b2.txt" , std::ios::out | std::ios::app);
-    fpx_b2 <<"\n"<<i<<") "<< x_b2.real().format(MatlabFmtInline)<<"+i*"<<x_b2.imag().format(MatlabFmtInline) << std::endl;
-    fpx_b2.close();
+    // fpx_b1 = fopen ("vectorx_b1.txt" , "a+");//write to file solution x for b1
+		// printVec_Matlab_mp(fpx_b1, sprec, x_b1);
+    // fclose(fpx_b1);
+    //
+    // fpx_b2.open("vectorx_b2.txt" , std::ios::out | std::ios::app);
+    // fpx_b2 <<"\n"<<i<<") "<< x_b2.real().format(MatlabFmtInline)<<"+i*"<<x_b2.imag().format(MatlabFmtInline) << std::endl;
+    // fpx_b2.close();
 
     // buffer << x_b2.real().format(MatlabFmtInline)<<"+i*"<<x_b2.imag().format(MatlabFmtInline) << std::endl;
     // fpx_b2 = fopen ("vectorx_b2.txt" , "a+");
@@ -225,9 +230,9 @@ int main()
     // buffer.clear();
 
     //Print each percent of loop
-      if ( tmp != (int)100*i/iter )
+      if ( tmp != (int)100*(i+1)/iter )
         {
-     	 	tmp = (int)100*i/iter;
+     	 	tmp = (int)100*(i+1)/iter;
      	 	if ((tmp%1)  == 0)
          {
           std::cout << "Percentage complete: " << tmp<< "%\n";

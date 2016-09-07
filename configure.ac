@@ -31,6 +31,8 @@ AC_CONFIG_FILES([Makefile])
 #find the CC compiler
 AC_PROG_CXX
 
+#find the flags for C++14
+AX_CXX_COMPILE_STDCXX_14
 
 #enable the creation of shared libraries
 AC_ENABLE_SHARED

@@ -8,4 +8,4 @@ b1_timing_LDADD = $(BOOST_FILESYSTEM_LIB) $(BOOST_SYSTEM_LIB)  $(BOOST_CHRONO_LI
 
 #libpartitionParse.a
 
-b1_timing_CXXFLAGS = -D_HAVE_MPI -std=c++11 $(BOOST_CPPFLAGS)
+b1_timing_CXXFLAGS = $(BOOST_CPPFLAGS)
